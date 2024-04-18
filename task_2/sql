@@ -1,0 +1,70 @@
+
+WITH sub_result AS (
+  SELECT
+    id,
+	parent_id,
+    name,
+    1 AS sub_level
+  FROM subdivisions
+	WHERE parent_id IS NULL AND id =
+		(SELECT
+			subdivision_id
+		FROM collaborators
+			WHERE id = 710253)
+  UNION ALL
+  SELECT
+    e.id,
+	e.parent_id,
+    e.name,
+    sub_level + 1
+  FROM subdivisions e
+	INNER JOIN sub_result r
+    ON e.parent_id = r.id
+)
+SELECT *
+INTO #sub_result
+FROM sub_result;
+
+WITH result AS (
+SELECT
+	collaborators.id,
+	collaborators.name,
+	#sub_result.name AS sub_name,
+	#sub_result.id AS sub_id,
+	#sub_result.parent_id,
+	#sub_result.sub_level
+		FROM collaborators
+			INNER JOIN #sub_result
+			ON collaborators.subdivision_id = #sub_result.id
+		WHERE collaborators.age < 40 AND #sub_result.id != 100055 AND #sub_result.id != 100059 AND #sub_result.id >
+			(SELECT
+				subdivision_id
+			FROM collaborators
+				WHERE id = 710253)
+)
+SELECT
+	result.id,
+	result.name,
+	result.sub_name,
+	result.sub_id,
+	result.sub_level,
+	colls_count = (SELECT COUNT(*) FROM result WHERE parent_id = subdivisions.id) + 1
+		FROM result
+			INNER JOIN subdivisions
+			ON result.sub_id = subdivisions.id
+		ORDER BY result.sub_level ;
+
+Время синтаксического анализа и компиляции SQL Server:
+ время ЦП = 0 мс, истекшее время = 4 мс.
+
+ Время работы SQL Server:
+   Время ЦП = 0 мс, затраченное время = 2 мс.
+
+(8 rows affected)
+Время синтаксического анализа и компиляции SQL Server:
+ время ЦП = 0 мс, истекшее время = 21 мс.
+
+(10 rows affected)
+
+ Время работы SQL Server:
+   Время ЦП = 0 мс, затраченное время = 0 мс.

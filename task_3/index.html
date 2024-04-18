@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<%
+for (arrItems  in XQuery( 'for $elem in collaborators return $elem'))
+    {
+
+%>
+    <p><%=arrItems.fullname %></p>
+<%
+    }
+%>
+
+</body>
+</html>
